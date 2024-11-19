@@ -1,0 +1,284 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>9.杂项讨论 | BoCodeSailor's blog</title><meta name="author" content="Malisa Kalven"><meta name="copyright" content="Malisa Kalven"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="杂项讨论条款53：不要轻忽编译器的警告· 严肃对待编译器发出的警告信息。努力在你的编译器的最高（最严苛）警告级别下争取“无任何警告”的荣誉。 · 不要过度倚赖编译器的报警能力，因为不同的编译器对待事情的态度并不相同。一旦移植到另一个编译器上，你原本倚赖的警告信息有可能消失。 条款54：让自己熟悉包括TR1在内的标准程序库· C++标准程序库的主要机能由STL、iostreams、locales组成">
+<meta property="og:type" content="article">
+<meta property="og:title" content="9.杂项讨论">
+<meta property="og:url" content="https://bocodesailor.github.io/2024/11/19/9-%E6%9D%82%E9%A1%B9%E8%AE%A8%E8%AE%BA/index.html">
+<meta property="og:site_name" content="BoCodeSailor&#39;s blog">
+<meta property="og:description" content="杂项讨论条款53：不要轻忽编译器的警告· 严肃对待编译器发出的警告信息。努力在你的编译器的最高（最严苛）警告级别下争取“无任何警告”的荣誉。 · 不要过度倚赖编译器的报警能力，因为不同的编译器对待事情的态度并不相同。一旦移植到另一个编译器上，你原本倚赖的警告信息有可能消失。 条款54：让自己熟悉包括TR1在内的标准程序库· C++标准程序库的主要机能由STL、iostreams、locales组成">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bocodesailor.github.io/img/butterfly-icon2.png">
+<meta property="article:published_time" content="2024-11-19T08:09:08.000Z">
+<meta property="article:modified_time" content="2024-11-19T08:10:06.685Z">
+<meta property="article:author" content="Malisa Kalven">
+<meta property="article:tag" content="Effective C++">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bocodesailor.github.io/img/butterfly-icon2.png"><link rel="shortcut icon" href="/img/b.png"><link rel="canonical" href="https://bocodesailor.github.io/2024/11/19/9-%E6%9D%82%E9%A1%B9%E8%AE%A8%E8%AE%BA/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        if (name && globalFn[key][name]) return
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: Malisa Kalven","link":"链接: ","source":"来源: BoCodeSailor's blog","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"top-right"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '9.杂项讨论',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-11-19 16:10:06'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(/img/background.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/butterfly-icon2.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: transparent;"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">BoCodeSailor's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">9.杂项讨论</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">9.杂项讨论</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-11-19T08:09:08.000Z" title="发表于 2024-11-19 16:09:08">2024-11-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-11-19T08:10:06.685Z" title="更新于 2024-11-19 16:10:06">2024-11-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Effective-C-%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">Effective C++阅读笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="杂项讨论"><a href="#杂项讨论" class="headerlink" title="杂项讨论"></a>杂项讨论</h1><h2 id="条款53：不要轻忽编译器的警告"><a href="#条款53：不要轻忽编译器的警告" class="headerlink" title="条款53：不要轻忽编译器的警告"></a>条款53：不要轻忽编译器的警告</h2><p>· 严肃对待编译器发出的警告信息。努力在你的编译器的最高（最严苛）警告级别下争取“无任何警告”的荣誉。</p>
+<p>· 不要过度倚赖编译器的报警能力，因为不同的编译器对待事情的态度并不相同。一旦移植到另一个编译器上，你原本倚赖的警告信息有可能消失。</p>
+<h2 id="条款54：让自己熟悉包括TR1在内的标准程序库"><a href="#条款54：让自己熟悉包括TR1在内的标准程序库" class="headerlink" title="条款54：让自己熟悉包括TR1在内的标准程序库"></a>条款54：让自己熟悉包括TR1在内的标准程序库</h2><p>· C++标准程序库的主要机能由STL、iostreams、locales组成。并包含C99标准程序库。</p>
+<p>· TR1添加了智能指针（例如tr1::shared_ptr）、一般化函数指针（tr1::function）、hash-based容器、正则表达式（regular expressions）以及另外10个组件的支持。</p>
+<p>· RT1自身只是一份规范。为获得TR1提供的好处，你需要一份实物。一个好的实物来源是Boost。</p>
+<p><strong>TR1</strong> (Technical Report 1) 是一个 C++ 标准委员会发布的技术报告，主要包含了对 C++ 标准库的一些扩展和改进。它并不是 C++ 标准的一部分，而是一个建议性的文档，提出了新的库组件，以便将来可能加入 C++ 标准。</p>
+<p>TR1 是 C++ 标准委员会在 C++03 标准（也就是 2003 年发布的标准）之后的一项工作，它包含了一些新的库功能，旨在改进 C++ 标准库的可用性和灵活性。它主要是为了为 C++ 标准库的扩展提供指导，并为 C++11 标准的某些新特性铺平道路。</p>
+<h3 id="TR1-的内容"><a href="#TR1-的内容" class="headerlink" title="TR1 的内容"></a>TR1 的内容</h3><p>TR1 包含了许多新的库组件，主要包括：</p>
+<ol>
+<li><p><strong>智能指针</strong>：</p>
+<ul>
+<li>引入了 <code>std::shared_ptr</code> 和 <code>std::weak_ptr</code>，这两个智能指针类帮助管理动态分配内存，避免内存泄漏。</li>
+</ul>
+</li>
+<li><p><strong>正则表达式</strong>：</p>
+<ul>
+<li>TR1 引入了对正则表达式的支持，提供了 <code>std::regex</code> 类，允许开发者使用正则表达式进行模式匹配和文本搜索。</li>
+</ul>
+</li>
+<li><p><strong>哈希表</strong>：</p>
+<ul>
+<li>TR1 引入了对哈希容器的支持，如 <code>std::unordered_map</code> 和 <code>std::unordered_set</code>，这是一个新的基于哈希的容器，它比传统的 <code>std::map</code> 和 <code>std::set</code> 更适用于某些情况下的快速查找。</li>
+</ul>
+</li>
+<li><p><strong>函数对象和绑定</strong>：</p>
+<ul>
+<li>引入了 <code>std::bind</code>、<code>std::function</code> 和 <code>std::mem_fn</code> 等工具，使得函数指针和回调函数的使用更加灵活。</li>
+</ul>
+</li>
+<li><p><strong>数学功能和数值计算库</strong>：</p>
+<ul>
+<li>增强了对数值计算的支持，包括一些数学常数和数学函数。</li>
+</ul>
+</li>
+<li><p><strong>类型特性</strong>：</p>
+<ul>
+<li>引入了一些类型特性，比如 <code>std::is_same</code>，使得可以更方便地进行模板元编程。</li>
+</ul>
+</li>
+</ol>
+<h3 id="TR1-与-C-11-的关系"><a href="#TR1-与-C-11-的关系" class="headerlink" title="TR1 与 C++11 的关系"></a>TR1 与 C++11 的关系</h3><p>许多 TR1 中提出的特性，最终都成为了 C++11 标准的一部分。比如：</p>
+<ul>
+<li><code>std::shared_ptr</code> 和 <code>std::weak_ptr</code> 最终成为 C++11 标准的一部分。</li>
+<li><code>std::regex</code> 和 <code>std::unordered_map</code> 也最终被纳入了 C++11 标准库。</li>
+</ul>
+<p>因此，TR1 可以看作是 C++ 标准库的一次实验性扩展，它提出了许多新的特性，为 C++11 中的标准库功能做了重要的准备工作。</p>
+<h2 id="条款-55：让自己熟悉-Boost"><a href="#条款-55：让自己熟悉-Boost" class="headerlink" title="条款 55：让自己熟悉 Boost"></a>条款 55：让自己熟悉 Boost</h2><p>Boost 是一个广泛使用的 C++ 开源库，它提供了许多高质量、跨平台的库，涵盖了各种各样的功能，如算法、数据结构、并发、内存管理、文件系统等。熟悉 Boost 可以大大提升 C++ 开发的效率，因为它包含了许多在 C++ 标准库中尚未实现或尚不完全的功能。</p>
+<h3 id="为什么要熟悉-Boost？"><a href="#为什么要熟悉-Boost？" class="headerlink" title="为什么要熟悉 Boost？"></a>为什么要熟悉 Boost？</h3><ol>
+<li><p><strong>功能丰富</strong>：<br>Boost 包含了很多功能强大的库，许多库的设计和实现质量非常高，并且经过了广泛的测试和优化。例如，它提供了对现代 C++ 标准的良好支持，包括模板元编程、智能指针、线程、文件系统等。</p>
+</li>
+<li><p><strong>标准库扩展</strong>：<br>Boost 的许多库功能，最终都被 C++ 标准委员会采纳，成为 C++ 标准库的一部分。举例来说，<code>std::shared_ptr</code> 和 <code>std::weak_ptr</code> 最初是在 Boost 中实现的，后来被纳入了 C++11 标准。理解 Boost 里的实现，可以帮助你更好地理解 C++ 标准库。</p>
+</li>
+<li><p><strong>性能和可移植性</strong>：<br>Boost 库通常是跨平台的，可以在不同操作系统上运行。它们设计时注重性能，并且有很多功能支持硬件加速，使用 Boost 可以使你在不同平台上写出性能优越的代码。</p>
+</li>
+<li><p><strong>提高生产力</strong>：<br>Boost 提供了大量现成的解决方案，避免了你重新发明轮子。在很多情况下，Boost 已经为你解决了常见的编程问题，节省了编写和测试代码的时间。</p>
+</li>
+<li><p><strong>增强 C++ 特性</strong>：<br>Boost 提供了许多 C++ 标准库没有的功能，例如动态语言绑定、正则表达式库、图形库、跨平台线程库等，掌握这些特性将使你能够编写更复杂、更高效的代码。</p>
+</li>
+</ol>
+<h3 id="常用的-Boost-库"><a href="#常用的-Boost-库" class="headerlink" title="常用的 Boost 库"></a>常用的 Boost 库</h3><p>以下是一些常用的 Boost 库，熟悉它们可以帮助你提升编程技能：</p>
+<ol>
+<li><p><strong>Boost.SmartPtr</strong>：</p>
+<ul>
+<li>提供智能指针，例如 <code>shared_ptr</code>、<code>weak_ptr</code> 和 <code>scoped_ptr</code>，用于更安全的内存管理。</li>
+</ul>
+</li>
+<li><p><strong>Boost.Thread</strong>：</p>
+<ul>
+<li>用于多线程编程，提供线程管理、互斥锁、条件变量等多线程同步机制。</li>
+</ul>
+</li>
+<li><p><strong>Boost.Asio</strong>：</p>
+<ul>
+<li>提供跨平台的异步 I&#x2F;O 支持，广泛用于网络编程和并发任务处理。</li>
+</ul>
+</li>
+<li><p><strong>Boost.Filesystem</strong>：</p>
+<ul>
+<li>提供文件系统操作的功能，如路径操作、文件遍历等，简化跨平台的文件系统访问。</li>
+</ul>
+</li>
+<li><p><strong>Boost.Regex</strong>：</p>
+<ul>
+<li>提供正则表达式的匹配和处理功能，比 C++ 标准库中的正则表达式功能更加强大。</li>
+</ul>
+</li>
+<li><p><strong>Boost.MPL（元编程库）</strong>：</p>
+<ul>
+<li>支持 C++ 模板元编程，提供了许多用于类型操作、模板计算等的工具。</li>
+</ul>
+</li>
+<li><p><strong>Boost.Spirit</strong>：</p>
+<ul>
+<li>一个用于编写解析器的库，可以用于处理自定义的文法解析。</li>
+</ul>
+</li>
+<li><p><strong>Boost.Test</strong>：</p>
+<ul>
+<li>提供单元测试框架，帮助开发者编写和管理 C++ 单元测试。</li>
+</ul>
+</li>
+<li><p><strong>Boost.Serialization</strong>：</p>
+<ul>
+<li>支持 C++ 对象的序列化和反序列化，便于对象存储和传输。</li>
+</ul>
+</li>
+<li><p><strong>Boost.Heap</strong>：</p>
+<ul>
+<li>提供了更高效的堆（heap）实现，适用于各种基于优先队列的算法。</li>
+</ul>
+</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://bocodesailor.github.io">Malisa Kalven</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://bocodesailor.github.io/2024/11/19/9-%E6%9D%82%E9%A1%B9%E8%AE%A8%E8%AE%BA/">https://bocodesailor.github.io/2024/11/19/9-%E6%9D%82%E9%A1%B9%E8%AE%A8%E8%AE%BA/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://bocodesailor.github.io" target="_blank">BoCodeSailor's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Effective-C/">Effective C++</a></div><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon2.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="next-post pull-full" href="/2024/11/19/8-%E5%AE%9A%E5%88%B6new%E5%92%8Cdelete/" title="8.定制new和delete"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">8.定制new和delete</div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a href="/2024/11/05/1-%E8%AE%A9%E8%87%AA%E5%B7%B1%E4%B9%A0%E6%83%AFc/" title="1.让自己习惯c++"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-05</div><div class="title">1.让自己习惯c++</div></div></a><a href="/2024/11/08/2-%E6%9E%84%E9%80%A0%E6%9E%90%E6%9E%84%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97/" title="2.构造析构赋值运算"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-08</div><div class="title">2.构造析构赋值运算</div></div></a><a href="/2024/11/15/5-%E5%AE%9E%E7%8E%B0/" title="5.实现"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-15</div><div class="title">5.实现</div></div></a><a href="/2024/11/08/3-%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/" title="3.资源管理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-08</div><div class="title">3.资源管理</div></div></a><a href="/2024/11/15/4-%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%A3%B0%E6%98%8E/" title="4.设计与声明"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-15</div><div class="title">4.设计与声明</div></div></a><a href="/2024/11/15/6-%E7%BB%A7%E6%89%BF%E4%B8%8E%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1/" title="6.继承与面向对象设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-15</div><div class="title">6.继承与面向对象设计</div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/butterfly-icon2.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Malisa Kalven</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">10</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/BoCodeSailor"><i class="fab fa-github"></i><span>前往小家...</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/BoCodeSailor" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:kalvenmalisa78@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9D%82%E9%A1%B9%E8%AE%A8%E8%AE%BA"><span class="toc-number">1.</span> <span class="toc-text">杂项讨论</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE53%EF%BC%9A%E4%B8%8D%E8%A6%81%E8%BD%BB%E5%BF%BD%E7%BC%96%E8%AF%91%E5%99%A8%E7%9A%84%E8%AD%A6%E5%91%8A"><span class="toc-number">1.1.</span> <span class="toc-text">条款53：不要轻忽编译器的警告</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE54%EF%BC%9A%E8%AE%A9%E8%87%AA%E5%B7%B1%E7%86%9F%E6%82%89%E5%8C%85%E6%8B%ACTR1%E5%9C%A8%E5%86%85%E7%9A%84%E6%A0%87%E5%87%86%E7%A8%8B%E5%BA%8F%E5%BA%93"><span class="toc-number">1.2.</span> <span class="toc-text">条款54：让自己熟悉包括TR1在内的标准程序库</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#TR1-%E7%9A%84%E5%86%85%E5%AE%B9"><span class="toc-number">1.2.1.</span> <span class="toc-text">TR1 的内容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TR1-%E4%B8%8E-C-11-%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-number">1.2.2.</span> <span class="toc-text">TR1 与 C++11 的关系</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE-55%EF%BC%9A%E8%AE%A9%E8%87%AA%E5%B7%B1%E7%86%9F%E6%82%89-Boost"><span class="toc-number">1.3.</span> <span class="toc-text">条款 55：让自己熟悉 Boost</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%86%9F%E6%82%89-Boost%EF%BC%9F"><span class="toc-number">1.3.1.</span> <span class="toc-text">为什么要熟悉 Boost？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84-Boost-%E5%BA%93"><span class="toc-number">1.3.2.</span> <span class="toc-text">常用的 Boost 库</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/19/9-%E6%9D%82%E9%A1%B9%E8%AE%A8%E8%AE%BA/" title="9.杂项讨论">9.杂项讨论</a><time datetime="2024-11-19T08:09:08.000Z" title="发表于 2024-11-19 16:09:08">2024-11-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/19/8-%E5%AE%9A%E5%88%B6new%E5%92%8Cdelete/" title="8.定制new和delete">8.定制new和delete</a><time datetime="2024-11-19T08:08:06.000Z" title="发表于 2024-11-19 16:08:06">2024-11-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/19/7-%E6%A8%A1%E6%9D%BF%E4%B8%8E%E6%B3%9B%E5%9E%8B%E7%BC%96%E7%A8%8B/" title="7.模板与泛型编程">7.模板与泛型编程</a><time datetime="2024-11-19T07:39:44.000Z" title="发表于 2024-11-19 15:39:44">2024-11-19</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/15/6-%E7%BB%A7%E6%89%BF%E4%B8%8E%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1/" title="6.继承与面向对象设计">6.继承与面向对象设计</a><time datetime="2024-11-15T03:36:51.000Z" title="发表于 2024-11-15 11:36:51">2024-11-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/15/5-%E5%AE%9E%E7%8E%B0/" title="5.实现">5.实现</a><time datetime="2024-11-15T03:21:42.000Z" title="发表于 2024-11-15 11:21:42">2024-11-15</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent;"><div id="footer-wrap"><div class="copyright">&copy;2024 By Malisa Kalven</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">I wish you to become your own sun, no need to rely on who's light.</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">简</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>(() => {
+  const panguFn = () => {
+    if (typeof pangu === 'object') pangu.autoSpacingPage()
+    else {
+      btf.getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+        .then(() => {
+          pangu.autoSpacingPage()
+        })
+    }
+  }
+
+  const panguInit = () => {
+    if (false){
+      GLOBAL_CONFIG_SITE.isPost && panguFn()
+    } else {
+      panguFn()
+    }
+  }
+
+  btf.addGlobalFn('pjaxComplete', panguInit, 'pangu')
+  document.addEventListener('DOMContentLoaded', panguInit)
+})()</script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="30" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/nico.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body></html>
