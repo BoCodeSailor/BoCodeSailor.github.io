@@ -1,0 +1,340 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>3.异常 | BoCodeSailor's blog</title><meta name="author" content="Malisa Kalven"><meta name="copyright" content="Malisa Kalven"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="异常条款 9:利用 destructors 避免泄露资源析构函数的主要特点使其成为避免资源泄露的重要工具：  自动调用：对象的生命周期结束时，析构函数会自动被调用，无需显式调用。 与对象绑定：资源与对象的生命周期绑定，当对象销毁时，相关资源也会被释放。   资源泄露的常见场景 手动分配内存未释放 1234void leakMemory() &#123;    int* p &#x3D; new int(42">
+<meta property="og:type" content="article">
+<meta property="og:title" content="3.异常">
+<meta property="og:url" content="https://bocodesailor.github.io/2024/12/06/3-%E5%BC%82%E5%B8%B8/index.html">
+<meta property="og:site_name" content="BoCodeSailor&#39;s blog">
+<meta property="og:description" content="异常条款 9:利用 destructors 避免泄露资源析构函数的主要特点使其成为避免资源泄露的重要工具：  自动调用：对象的生命周期结束时，析构函数会自动被调用，无需显式调用。 与对象绑定：资源与对象的生命周期绑定，当对象销毁时，相关资源也会被释放。   资源泄露的常见场景 手动分配内存未释放 1234void leakMemory() &#123;    int* p &#x3D; new int(42">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://bocodesailor.github.io/img/butterfly-icon2.png">
+<meta property="article:published_time" content="2024-12-06T11:10:02.000Z">
+<meta property="article:modified_time" content="2024-12-06T11:13:01.224Z">
+<meta property="article:author" content="Malisa Kalven">
+<meta property="article:tag" content="More Effective C++">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://bocodesailor.github.io/img/butterfly-icon2.png"><link rel="shortcut icon" href="/img/b.png"><link rel="canonical" href="https://bocodesailor.github.io/2024/12/06/3-%E5%BC%82%E5%B8%B8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        if (name && globalFn[key][name]) return
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: Malisa Kalven","link":"链接: ","source":"来源: BoCodeSailor's blog","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"top-right"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '3.异常',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-12-06 19:13:01'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(/img/background.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/butterfly-icon2.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: transparent;"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">BoCodeSailor's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">3.异常</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">3.异常</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-12-06T11:10:02.000Z" title="发表于 2024-12-06 19:10:02">2024-12-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-12-06T11:13:01.224Z" title="更新于 2024-12-06 19:13:01">2024-12-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/More-Effective-C-%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">More Effective C++阅读笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3.5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>12分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h1><h2 id="条款-9-利用-destructors-避免泄露资源"><a href="#条款-9-利用-destructors-避免泄露资源" class="headerlink" title="条款 9:利用 destructors 避免泄露资源"></a>条款 9:利用 destructors 避免泄露资源</h2><p>析构函数的主要特点使其成为避免资源泄露的重要工具：</p>
+<ol>
+<li><strong>自动调用</strong>：对象的生命周期结束时，析构函数会自动被调用，无需显式调用。</li>
+<li><strong>与对象绑定</strong>：资源与对象的生命周期绑定，当对象销毁时，相关资源也会被释放。</li>
+</ol>
+<hr>
+<h3 id="资源泄露的常见场景"><a href="#资源泄露的常见场景" class="headerlink" title="资源泄露的常见场景"></a><strong>资源泄露的常见场景</strong></h3><ol>
+<li><p><strong>手动分配内存未释放</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">leakMemory</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span>* p = <span class="keyword">new</span> <span class="built_in">int</span>(<span class="number">42</span>);</span><br><span class="line">    <span class="comment">// 忘记 delete p，导致内存泄露</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>打开的文件未关闭</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">leakFile</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    FILE* file = <span class="built_in">fopen</span>(<span class="string">&quot;data.txt&quot;</span>, <span class="string">&quot;r&quot;</span>);</span><br><span class="line">    <span class="comment">// 忘记 fclose(file)，文件句柄泄露</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>未释放锁或网络连接</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">leakLock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::mutex m;</span><br><span class="line">    m.<span class="built_in">lock</span>();</span><br><span class="line">    <span class="comment">// 忘记 m.unlock()，可能导致死锁</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<hr>
+<h3 id="利用析构函数管理资源"><a href="#利用析构函数管理资源" class="headerlink" title="利用析构函数管理资源"></a><strong>利用析构函数管理资源</strong></h3><p>通过在类中封装资源，并在析构函数中释放资源，可以有效避免泄露。这一思想称为 <strong>资源获取即初始化（RAII，Resource Acquisition Is Initialization）</strong>。</p>
+<p>示例：管理动态内存</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Resource</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span>* data;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Resource</span>() : <span class="built_in">data</span>(<span class="keyword">new</span> <span class="built_in">int</span>(<span class="number">42</span>)) &#123; &#125;</span><br><span class="line">    ~<span class="built_in">Resource</span>() &#123;</span><br><span class="line">        <span class="keyword">delete</span> data; <span class="comment">// 在析构函数中释放内存</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">safeMemory</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Resource r; <span class="comment">// r 的生命周期结束时，自动释放内存</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>示例：管理文件句柄</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">FileHandle</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    FILE* file;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">FileHandle</span>(<span class="type">const</span> <span class="type">char</span>* filename, <span class="type">const</span> <span class="type">char</span>* mode)</span><br><span class="line">        : <span class="built_in">file</span>(<span class="built_in">fopen</span>(filename, mode)) &#123; &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">FileHandle</span>() &#123;</span><br><span class="line">        <span class="keyword">if</span> (file) <span class="built_in">fclose</span>(file); <span class="comment">// 确保文件句柄被关闭</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>示例：管理互斥锁</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MutexLock</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::mutex&amp; m;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">MutexLock</span>(std::mutex&amp; mutex) : <span class="built_in">m</span>(mutex) &#123;</span><br><span class="line">        m.<span class="built_in">lock</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">MutexLock</span>() &#123;</span><br><span class="line">        m.<span class="built_in">unlock</span>(); <span class="comment">// 确保互斥锁被解锁</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="RAII-的关键思想"><a href="#RAII-的关键思想" class="headerlink" title="RAII 的关键思想"></a><strong>RAII 的关键思想</strong></h3><ol>
+<li><strong>将资源的生命周期绑定到对象的生命周期</strong><ul>
+<li>使用构造函数初始化资源。</li>
+<li>在析构函数中释放资源。</li>
+</ul>
+</li>
+<li><strong>异常安全</strong><ul>
+<li>即使程序抛出异常，析构函数也会自动被调用，确保资源被正确释放。</li>
+<li>RAII 使得代码在异常处理方面更具健壮性。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="现代-C-中的-RAII-工具"><a href="#现代-C-中的-RAII-工具" class="headerlink" title="现代 C++ 中的 RAII 工具"></a><strong>现代 C++ 中的 RAII 工具</strong></h3><p>现代 C++ 提供了大量基于 RAII 的标准库工具，可以简化资源管理：</p>
+<ol>
+<li><p><strong><code>std::unique_ptr</code> 和 <code>std::shared_ptr</code></strong></p>
+<ul>
+<li>智能指针用于管理动态内存，避免手动调用 <code>delete</code>。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">std::unique_ptr&lt;<span class="type">int</span>&gt; <span class="title">ptr</span><span class="params">(<span class="keyword">new</span> <span class="type">int</span>(<span class="number">42</span>))</span></span>; <span class="comment">// 自动释放内存</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>std::lock_guard</code> 和 <code>std::unique_lock</code></strong></p>
+<ul>
+<li>自动管理锁，确保异常发生时锁也会被释放。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">std::mutex m;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">safeLock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">std::lock_guard&lt;std::mutex&gt; <span class="title">lock</span><span class="params">(m)</span></span>; <span class="comment">// 自动解锁</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>std::fstream</code></strong></p>
+<ul>
+<li>文件流类自动管理文件句柄。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">std::ifstream <span class="title">file</span><span class="params">(<span class="string">&quot;data.txt&quot;</span>)</span></span>; <span class="comment">// 自动关闭文件</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="条款-10-在-constructors-内阻止资源泄露"><a href="#条款-10-在-constructors-内阻止资源泄露" class="headerlink" title="条款 10 :在 constructors 内阻止资源泄露"></a>条款 10 :在 constructors 内阻止资源泄露</h2><p>在 C++ 中，构造函数用于初始化对象。如果在构造函数内分配了资源（如动态内存、文件句柄等），但构造函数在完成之前抛出了异常，这些资源可能无法被正确释放，从而导致资源泄露。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Resource</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span>* data;</span><br><span class="line">    FILE* file;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Resource</span>(<span class="type">const</span> <span class="type">char</span>* filename) &#123;</span><br><span class="line">        data = <span class="keyword">new</span> <span class="type">int</span>[<span class="number">100</span>]; <span class="comment">// 分配动态内存</span></span><br><span class="line">        file = <span class="built_in">fopen</span>(filename, <span class="string">&quot;r&quot;</span>); <span class="comment">// 打开文件</span></span><br><span class="line">        <span class="keyword">if</span> (!file) <span class="keyword">throw</span> std::<span class="built_in">runtime_error</span>(<span class="string">&quot;Failed to open file&quot;</span>); <span class="comment">// 构造函数异常</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">Resource</span>() &#123;</span><br><span class="line">        <span class="keyword">delete</span>[] data; <span class="comment">// 释放动态内存</span></span><br><span class="line">        <span class="keyword">if</span> (file) <span class="built_in">fclose</span>(file); <span class="comment">// 关闭文件</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>问题：</p>
+<ul>
+<li>如果在 <code>fopen</code> 失败后抛出异常，析构函数不会被调用，因为对象未完全构造。</li>
+<li>这导致 <code>data</code> 分配的内存永远不会释放，造成内存泄露。</li>
+</ul>
+<hr>
+<h3 id="如何在构造函数中阻止资源泄露"><a href="#如何在构造函数中阻止资源泄露" class="headerlink" title="如何在构造函数中阻止资源泄露"></a><strong>如何在构造函数中阻止资源泄露</strong></h3><p><strong>RAII：将资源封装到独立类</strong></p>
+<p>将每种资源（如内存、文件句柄）封装到专门的 RAII 类中，这样即使构造函数抛出异常，封装资源的对象析构函数也会自动释放资源。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">FileHandle</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    FILE* file;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">FileHandle</span>(<span class="type">const</span> <span class="type">char</span>* filename, <span class="type">const</span> <span class="type">char</span>* mode) &#123;</span><br><span class="line">        file = <span class="built_in">fopen</span>(filename, mode);</span><br><span class="line">        <span class="keyword">if</span> (!file) <span class="keyword">throw</span> std::<span class="built_in">runtime_error</span>(<span class="string">&quot;Failed to open file&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">FileHandle</span>() &#123;</span><br><span class="line">        <span class="keyword">if</span> (file) <span class="built_in">fclose</span>(file); <span class="comment">// 确保文件句柄被关闭</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">FILE* <span class="title">get</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> file; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Resource</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::unique_ptr&lt;<span class="type">int</span>[]&gt; data; <span class="comment">// 使用智能指针管理内存</span></span><br><span class="line">    FileHandle fileHandle;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Resource</span>(<span class="type">const</span> <span class="type">char</span>* filename)</span><br><span class="line">        : <span class="built_in">data</span>(<span class="keyword">new</span> <span class="type">int</span>[<span class="number">100</span>]), <span class="built_in">fileHandle</span>(filename, <span class="string">&quot;r&quot;</span>) &#123; &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><strong>优势</strong>：</p>
+<ul>
+<li><code>data</code> 的内存由 <code>std::unique_ptr</code> 管理，异常时自动释放。</li>
+<li>文件句柄由 <code>FileHandle</code> 管理，异常时自动关闭。</li>
+</ul>
+<hr>
+<p><strong>使用智能指针管理动态内存</strong></p>
+<p>动态内存管理的常见问题可以通过智能指针（如 <code>std::unique_ptr</code> 或 <code>std::shared_ptr</code>）来解决。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Resource</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::unique_ptr&lt;<span class="type">int</span>[]&gt; data; <span class="comment">// 使用智能指针管理内存</span></span><br><span class="line">    std::shared_ptr&lt;<span class="type">int</span>&gt; sharedData;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Resource</span>()</span><br><span class="line">        : <span class="built_in">data</span>(<span class="keyword">new</span> <span class="type">int</span>[<span class="number">100</span>]),</span><br><span class="line">          <span class="built_in">sharedData</span>(std::<span class="built_in">make_shared</span>&lt;<span class="type">int</span>&gt;(<span class="number">42</span>)) &#123; &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果构造函数抛出异常，<code>std::unique_ptr</code> 和 <code>std::shared_ptr</code> 会自动释放已分配的资源。</li>
+</ul>
+<hr>
+<p><strong>避免在构造函数中进行复杂逻辑</strong></p>
+<p>构造函数中的复杂逻辑可能增加异常抛出的可能性。将复杂逻辑分离到其他方法中，有助于降低构造函数中资源管理的复杂性。</p>
+<p>示例：分离初始化逻辑</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Resource</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::unique_ptr&lt;<span class="type">int</span>[]&gt; data;</span><br><span class="line">    FileHandle fileHandle;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Resource</span>() = <span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">initialize</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* filename)</span> </span>&#123;</span><br><span class="line">        data.<span class="built_in">reset</span>(<span class="keyword">new</span> <span class="type">int</span>[<span class="number">100</span>]); <span class="comment">// 动态内存分配</span></span><br><span class="line">        fileHandle = <span class="built_in">FileHandle</span>(filename, <span class="string">&quot;r&quot;</span>); <span class="comment">// 文件句柄</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="条款-11-禁止异常流出-destructors之外"><a href="#条款-11-禁止异常流出-destructors之外" class="headerlink" title="条款 11: 禁止异常流出 destructors之外"></a>条款 11: 禁止异常流出 destructors之外</h2><ul>
+<li>如果析构函数在异常传播期间本身再抛出一个异常，这会导致<strong>双重异常</strong>。</li>
+<li>双重异常在 C++ 中会调用 <code>std::terminate</code>，导致程序非正常终止。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Example</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    ~<span class="built_in">Example</span>() &#123;</span><br><span class="line">        <span class="keyword">throw</span> std::<span class="built_in">runtime_error</span>(<span class="string">&quot;Destructor exception&quot;</span>); <span class="comment">// 错误：析构函数抛出异常</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Example e;</span><br><span class="line">        <span class="keyword">throw</span> std::<span class="built_in">runtime_error</span>(<span class="string">&quot;Outer exception&quot;</span>);</span><br><span class="line">    &#125; <span class="built_in">catch</span> (...) &#123;</span><br><span class="line">        <span class="comment">// 永远无法捕获，因为程序会在析构阶段崩溃</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>流程</strong>：</p>
+<ul>
+<li><code>throw std::runtime_error(&quot;Outer exception&quot;)</code> 开始传播异常。</li>
+<li>在 <code>Example</code> 的析构函数中，再次抛出异常。</li>
+<li>两个异常冲突，程序调用 <code>std::terminate</code>，直接崩溃。</li>
+</ul>
+<hr>
+<h3 id="如何避免析构函数中传播异常？"><a href="#如何避免析构函数中传播异常？" class="headerlink" title="如何避免析构函数中传播异常？"></a><strong>如何避免析构函数中传播异常？</strong></h3><p>如果析构函数中可能会发生异常，应捕获它们并妥善处理，确保异常不会传播。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SafeDestructor</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    ~<span class="built_in">SafeDestructor</span>() &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 可能抛出异常的代码</span></span><br><span class="line">            <span class="keyword">throw</span> std::<span class="built_in">runtime_error</span>(<span class="string">&quot;Error in destructor&quot;</span>);</span><br><span class="line">        &#125; <span class="built_in">catch</span> (...) &#123;</span><br><span class="line">            <span class="comment">// 捕获并记录异常，防止传播</span></span><br><span class="line">            std::cerr &lt;&lt; <span class="string">&quot;Exception in destructor caught and ignored.&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><strong>要点</strong>：</p>
+<ul>
+<li>捕获所有异常（通常使用 <code>catch (...)</code>）。</li>
+<li>记录或处理异常，避免其传播。</li>
+</ul>
+<h2 id="条款12：了解-“抛出一个-exception-”-与-“传递一个参数”-或-“调用一个虚函数”之间的差异"><a href="#条款12：了解-“抛出一个-exception-”-与-“传递一个参数”-或-“调用一个虚函数”之间的差异" class="headerlink" title="条款12：了解 “抛出一个 exception ”  与 “传递一个参数” 或 “调用一个虚函数”之间的差异"></a>条款12：了解 “抛出一个 exception ”  与 “传递一个参数” 或 “调用一个虚函数”之间的差异</h2><h3 id="异常处理类型转换"><a href="#异常处理类型转换" class="headerlink" title="异常处理类型转换"></a>异常处理类型转换</h3><p>在C++中，异常处理确实只支持有限的类型转换。当抛出一个异常时，catch块会尝试匹配异常对象的类型。只有两种情况下的类型转换是允许的：</p>
+<ol>
+<li><strong>从派生类到基类的转换</strong>：如果抛出了一个派生类类型的异常，可以用其基类类型的引用或指针来捕获。</li>
+<li><strong>void* 类型转换</strong>：可以使用 <code>const void*</code> 捕捉任何指针类型的异常，但这不是推荐的做法，因为它丧失了类型安全性。</li>
+</ol>
+<p>重要的是，如果抛出了一个 <code>int</code> 类型的异常，你不能用 <code>double</code> 类用来接收，因为它们之间没有继承关系，也不是指针类型。此外，C++的异常处理机制不支持隐式的数值类型转换。</p>
+<h3 id="异常处理中的-catch-子句顺序"><a href="#异常处理中的-catch-子句顺序" class="headerlink" title="异常处理中的 catch 子句顺序"></a>异常处理中的 catch 子句顺序</h3><p>关于多个 <code>catch</code> 子句，它们确实是按照出现的顺序进行匹配的。因此，更具体的异常类型应该放在更通用的异常类型之前。例如，如果你有一个 <code>runtime_error</code> 和一个更通用的 <code>exception</code>，你应该把 <code>runtime_error</code> 放在前面，否则它将永远不会被匹配到，因为所有 <code>runtime_error</code> 都是 <code>exception</code> 的子类</p>
+<p>相关链接：</p>
+<p><a target="_blank" rel="noopener" href="https://www.runoob.com/cplusplus/cpp-exceptions-handling.html">https://www.runoob.com/cplusplus/cpp-exceptions-handling.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/linuxAndMcu/p/10396723.html">https://www.cnblogs.com/linuxAndMcu/p/10396723.html</a></p>
+<h2 id="条款13：以-by-reference-方式捕捉-exceptions"><a href="#条款13：以-by-reference-方式捕捉-exceptions" class="headerlink" title="条款13：以 by reference 方式捕捉 exceptions"></a>条款13：以 by reference 方式捕捉 exceptions</h2><p>《More Effective C++》条款13提倡以引用的方式捕捉异常，主要是为了效率和避免对象切片（object slicing）的问题。当你以值传递的方式捕获异常时，C++ 会创建一个异常对象的副本，这不仅可能导致不必要的性能开销，而且如果异常对象是派生类的对象，而你用基类类型按值捕获，则会发生对象切片，即只复制了基类部分的数据，丢失了派生类特有的信息。</p>
+<h3 id="使用常量引用来捕获异常"><a href="#使用常量引用来捕获异常" class="headerlink" title="使用常量引用来捕获异常"></a>使用常量引用来捕获异常</h3><p>推荐的做法是以常量引用的方式捕获异常：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 可能抛出异常的代码</span></span><br><span class="line">&#125; <span class="built_in">catch</span> (<span class="type">const</span> std::exception&amp; e) &#123; <span class="comment">// 注意这里的 const 和 &amp;</span></span><br><span class="line">    <span class="comment">// 处理异常</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Caught exception: &quot;</span> &lt;&lt; e.<span class="built_in">what</span>() &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用 <code>const</code> 是因为通常我们不需要修改捕获到的异常对象，而且这样做可以确保不会意外地改变异常对象的状态。使用引用（<code>&amp;</code>）可以避免对象被复制，并且保留异常对象的实际类型信息，从而避免对象切片的问题。</p>
+<p>避免以下做法，因为它可能会导致对象切片或额外的复制开销：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 可能抛出异常的代码</span></span><br><span class="line">&#125; <span class="built_in">catch</span> (std::exception e) &#123; <span class="comment">// 不推荐：按值捕获</span></span><br><span class="line">    <span class="comment">// 处理异常</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用通配符捕获所有类型的异常</p>
+<p>如果你需要捕获所有类型的异常，但又不想指定具体类型，你可以使用省略号（<code>...</code>），但这应该作为最后的选择，因为这会捕获所有的异常，包括那些你不打算处理的系统级异常：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// 可能抛出异常的代码</span></span><br><span class="line">&#125; <span class="built_in">catch</span> (...) &#123; <span class="comment">// 捕获所有未被捕获的异常</span></span><br><span class="line">    <span class="comment">// 处理未知异常</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdexcept&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyException</span> : <span class="keyword">public</span> std::exception &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">const</span> <span class="type">char</span>* <span class="title">what</span><span class="params">()</span> <span class="type">const</span> <span class="keyword">noexcept</span> <span class="keyword">override</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;My custom exception&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">mayThrow</span><span class="params">(<span class="type">bool</span> throwIt)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (throwIt) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="built_in">MyException</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="built_in">mayThrow</span>(<span class="literal">true</span>); <span class="comment">// 抛出异常</span></span><br><span class="line">    &#125; <span class="built_in">catch</span> (<span class="type">const</span> MyException&amp; e) &#123; <span class="comment">// 捕获特定类型的异常</span></span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;Caught MyException: &quot;</span> &lt;&lt; e.<span class="built_in">what</span>() &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    &#125; <span class="built_in">catch</span> (<span class="type">const</span> std::exception&amp; e) &#123; <span class="comment">// 捕获所有继承自 std::exception 的异常</span></span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;Caught std::exception: &quot;</span> &lt;&lt; e.<span class="built_in">what</span>() &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    &#125; <span class="built_in">catch</span> (...) &#123; <span class="comment">// 捕获所有其他类型的异常</span></span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;Caught unknown exception\n&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="条款14：明智运用异常规范（exception-specifications）"><a href="#条款14：明智运用异常规范（exception-specifications）" class="headerlink" title="条款14：明智运用异常规范（exception specifications）"></a>条款14：明智运用异常规范（exception specifications）</h2><p>异常规范是C++中一个特性，允许开发者指定函数可能抛出的异常类型。然而，在实际应用中，异常规范往往被证明是有问题的，并且在现代C++编程中并不推荐使用。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> <span class="title">throw</span><span class="params">(<span class="type">int</span>, std::bad_alloc)</span></span>; <span class="comment">// 表示 func 只会抛出 int 或 std::bad_alloc 类型的异常</span></span><br></pre></td></tr></table></figure>
+
+<p>这告诉编译器 <code>func</code> 函数只会抛出 <code>int</code> 或者 <code>std::bad_alloc</code> 类型的异常。如果 <code>func</code> 抛出了其他类型的异常，那么程序将调用 <code>std::unexpected</code> 函数，其默认行为是终止程序。</p>
+<h3 id="为什么异常规范不被推荐"><a href="#为什么异常规范不被推荐" class="headerlink" title="为什么异常规范不被推荐"></a>为什么异常规范不被推荐</h3><ol>
+<li><strong>性能影响</strong>：编译器为了确保函数只抛出声明的异常类型，可能会插入额外的代码来进行检查，这可能导致性能下降。</li>
+<li><strong>维护困难</strong>：当函数内部实现发生变化时，你必须记得更新异常规范，否则可能会导致未捕获异常的行为。</li>
+<li><strong>违反封装性</strong>：异常规范暴露了函数内部可能抛出的异常，这实际上破坏了函数的封装性，因为它泄露了实现细节。</li>
+<li><strong>缺乏灵活性</strong>：如果一个函数调用了另一个具有更广泛异常规范的函数，或者抛出了新的异常类型，那么你就不得不修改它的异常规范。</li>
+<li><strong>编译器支持不一致</strong>：不同编译器对异常规范的支持和优化程度不一样，这可能导致跨平台开发中的问题。</li>
+</ol>
+<p>自C++11起，标准委员会意识到这些缺点，并引入了 <code>noexcept</code> 规范来替代旧的异常规范语法。<code>noexcept</code> 更加简单明确，它只是表示一个函数不会抛出任何异常。对于那些确实不会抛出异常的函数，使用 <code>noexcept</code> 可以帮助编译器进行优化，并且可以提高某些操作（如移动语义）的安全性和效率。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> <span class="keyword">noexcept</span></span>; <span class="comment">// 表示 func 不会抛出任何异常</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="条款15：了解异常处理的成本"><a href="#条款15：了解异常处理的成本" class="headerlink" title="条款15：了解异常处理的成本"></a>条款15：了解异常处理的成本</h2><p><strong>运行时性能开销</strong></p>
+<ul>
+<li><strong>堆栈展开</strong>：当一个异常被抛出时，程序会执行所谓的“堆栈展开”过程。这意味着从抛出异常的点开始，逐层返回到调用链中的每一层，直到找到匹配的 <code>catch</code> 块。这个过程中，每个函数的局部对象都会被销毁，这可能涉及非平凡的析构函数调用。</li>
+<li><strong>资源管理</strong>：为了确保在异常发生时正确地释放资源（如内存、文件句柄等），通常需要使用RAII（Resource Acquisition Is Initialization）原则。这意味着为每种资源创建一个类，并在该类的构造函数中获取资源，在析构函数中释放资源。虽然这是个好习惯，但也会增加额外的开销。</li>
+</ul>
+<p><strong>编译时成本</strong></p>
+<ul>
+<li><strong>代码膨胀</strong>：编译器必须生成额外的代码来支持异常处理，包括设置和清理异常处理信息。这可能导致二进制文件变大，并增加了编译时间。</li>
+<li><strong>优化限制</strong>：由于异常的存在，编译器在某些情况下无法进行特定的优化。例如，如果一个函数声明为可以抛出异常，那么编译器就不能假设它总是成功完成，这可能会限制内联和其他优化策略</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://bocodesailor.github.io">Malisa Kalven</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://bocodesailor.github.io/2024/12/06/3-%E5%BC%82%E5%B8%B8/">https://bocodesailor.github.io/2024/12/06/3-%E5%BC%82%E5%B8%B8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://bocodesailor.github.io" target="_blank">BoCodeSailor's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/More-Effective-C/">More Effective C++</a></div><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon2.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="prev-post pull-left" href="/2024/12/06/4-%E6%95%88%E7%8E%87/" title="4.效率"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">4.效率</div></div></a><a class="next-post pull-right" href="/2024/12/06/2-%E6%93%8D%E4%BD%9C%E7%AC%A6/" title="2.操作符"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">2.操作符</div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a href="/2024/12/06/1-%E5%9F%BA%E7%A1%80%E8%AE%AE%E9%A2%98/" title="1.基础议题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-06</div><div class="title">1.基础议题</div></div></a><a href="/2024/12/06/2-%E6%93%8D%E4%BD%9C%E7%AC%A6/" title="2.操作符"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-06</div><div class="title">2.操作符</div></div></a><a href="/2024/12/06/4-%E6%95%88%E7%8E%87/" title="4.效率"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-06</div><div class="title">4.效率</div></div></a><a href="/2024/12/06/5-%E6%8A%80%E6%9C%AF/" title="5.技术"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-06</div><div class="title">5.技术</div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/butterfly-icon2.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Malisa Kalven</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/BoCodeSailor"><i class="fab fa-github"></i><span>前往小家...</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/BoCodeSailor" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:kalvenmalisa78@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8"><span class="toc-number">1.</span> <span class="toc-text">异常</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE-9-%E5%88%A9%E7%94%A8-destructors-%E9%81%BF%E5%85%8D%E6%B3%84%E9%9C%B2%E8%B5%84%E6%BA%90"><span class="toc-number">1.1.</span> <span class="toc-text">条款 9:利用 destructors 避免泄露资源</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%84%E6%BA%90%E6%B3%84%E9%9C%B2%E7%9A%84%E5%B8%B8%E8%A7%81%E5%9C%BA%E6%99%AF"><span class="toc-number">1.1.1.</span> <span class="toc-text">资源泄露的常见场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E7%AE%A1%E7%90%86%E8%B5%84%E6%BA%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">利用析构函数管理资源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RAII-%E7%9A%84%E5%85%B3%E9%94%AE%E6%80%9D%E6%83%B3"><span class="toc-number">1.1.3.</span> <span class="toc-text">RAII 的关键思想</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%B0%E4%BB%A3-C-%E4%B8%AD%E7%9A%84-RAII-%E5%B7%A5%E5%85%B7"><span class="toc-number">1.1.4.</span> <span class="toc-text">现代 C++ 中的 RAII 工具</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE-10-%E5%9C%A8-constructors-%E5%86%85%E9%98%BB%E6%AD%A2%E8%B5%84%E6%BA%90%E6%B3%84%E9%9C%B2"><span class="toc-number">1.2.</span> <span class="toc-text">条款 10 :在 constructors 内阻止资源泄露</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%9C%A8%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E4%B8%AD%E9%98%BB%E6%AD%A2%E8%B5%84%E6%BA%90%E6%B3%84%E9%9C%B2"><span class="toc-number">1.2.1.</span> <span class="toc-text">如何在构造函数中阻止资源泄露</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE-11-%E7%A6%81%E6%AD%A2%E5%BC%82%E5%B8%B8%E6%B5%81%E5%87%BA-destructors%E4%B9%8B%E5%A4%96"><span class="toc-number">1.3.</span> <span class="toc-text">条款 11: 禁止异常流出 destructors之外</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E4%B8%AD%E4%BC%A0%E6%92%AD%E5%BC%82%E5%B8%B8%EF%BC%9F"><span class="toc-number">1.3.1.</span> <span class="toc-text">如何避免析构函数中传播异常？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE12%EF%BC%9A%E4%BA%86%E8%A7%A3-%E2%80%9C%E6%8A%9B%E5%87%BA%E4%B8%80%E4%B8%AA-exception-%E2%80%9D-%E4%B8%8E-%E2%80%9C%E4%BC%A0%E9%80%92%E4%B8%80%E4%B8%AA%E5%8F%82%E6%95%B0%E2%80%9D-%E6%88%96-%E2%80%9C%E8%B0%83%E7%94%A8%E4%B8%80%E4%B8%AA%E8%99%9A%E5%87%BD%E6%95%B0%E2%80%9D%E4%B9%8B%E9%97%B4%E7%9A%84%E5%B7%AE%E5%BC%82"><span class="toc-number">1.4.</span> <span class="toc-text">条款12：了解 “抛出一个 exception ”  与 “传递一个参数” 或 “调用一个虚函数”之间的差异</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"><span class="toc-number">1.4.1.</span> <span class="toc-text">异常处理类型转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E4%B8%AD%E7%9A%84-catch-%E5%AD%90%E5%8F%A5%E9%A1%BA%E5%BA%8F"><span class="toc-number">1.4.2.</span> <span class="toc-text">异常处理中的 catch 子句顺序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE13%EF%BC%9A%E4%BB%A5-by-reference-%E6%96%B9%E5%BC%8F%E6%8D%95%E6%8D%89-exceptions"><span class="toc-number">1.5.</span> <span class="toc-text">条款13：以 by reference 方式捕捉 exceptions</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E5%B8%B8%E9%87%8F%E5%BC%95%E7%94%A8%E6%9D%A5%E6%8D%95%E8%8E%B7%E5%BC%82%E5%B8%B8"><span class="toc-number">1.5.1.</span> <span class="toc-text">使用常量引用来捕获异常</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE14%EF%BC%9A%E6%98%8E%E6%99%BA%E8%BF%90%E7%94%A8%E5%BC%82%E5%B8%B8%E8%A7%84%E8%8C%83%EF%BC%88exception-specifications%EF%BC%89"><span class="toc-number">1.6.</span> <span class="toc-text">条款14：明智运用异常规范（exception specifications）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BC%82%E5%B8%B8%E8%A7%84%E8%8C%83%E4%B8%8D%E8%A2%AB%E6%8E%A8%E8%8D%90"><span class="toc-number">1.6.1.</span> <span class="toc-text">为什么异常规范不被推荐</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E6%AC%BE15%EF%BC%9A%E4%BA%86%E8%A7%A3%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%9A%84%E6%88%90%E6%9C%AC"><span class="toc-number">1.7.</span> <span class="toc-text">条款15：了解异常处理的成本</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/12/06/5-%E6%8A%80%E6%9C%AF/" title="5.技术">5.技术</a><time datetime="2024-12-06T11:10:43.000Z" title="发表于 2024-12-06 19:10:43">2024-12-06</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/12/06/4-%E6%95%88%E7%8E%87/" title="4.效率">4.效率</a><time datetime="2024-12-06T11:10:21.000Z" title="发表于 2024-12-06 19:10:21">2024-12-06</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/12/06/3-%E5%BC%82%E5%B8%B8/" title="3.异常">3.异常</a><time datetime="2024-12-06T11:10:02.000Z" title="发表于 2024-12-06 19:10:02">2024-12-06</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/12/06/2-%E6%93%8D%E4%BD%9C%E7%AC%A6/" title="2.操作符">2.操作符</a><time datetime="2024-12-06T11:07:59.000Z" title="发表于 2024-12-06 19:07:59">2024-12-06</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/12/06/1-%E5%9F%BA%E7%A1%80%E8%AE%AE%E9%A2%98/" title="1.基础议题">1.基础议题</a><time datetime="2024-12-06T11:06:32.000Z" title="发表于 2024-12-06 19:06:32">2024-12-06</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent;"><div id="footer-wrap"><div class="copyright">&copy;2024 By Malisa Kalven</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">I wish you to become your own sun, no need to rely on who's light.</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">简</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>(() => {
+  const panguFn = () => {
+    if (typeof pangu === 'object') pangu.autoSpacingPage()
+    else {
+      btf.getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+        .then(() => {
+          pangu.autoSpacingPage()
+        })
+    }
+  }
+
+  const panguInit = () => {
+    if (false){
+      GLOBAL_CONFIG_SITE.isPost && panguFn()
+    } else {
+      panguFn()
+    }
+  }
+
+  btf.addGlobalFn('pjaxComplete', panguInit, 'pangu')
+  document.addEventListener('DOMContentLoaded', panguInit)
+})()</script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="30" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/nico.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body></html>
